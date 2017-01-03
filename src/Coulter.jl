@@ -10,6 +10,7 @@ module Coulter
     A simplified representation of a coulter counter run
     """
     type CoulterCounterRun
+        filename::String
         sample::String
         timepoint::DateTime
         data::Vector{Float64}
@@ -21,8 +22,8 @@ module Coulter
     Loads `filename` and assigns it a sample, returns a
     `CoulterCounterRun` object
     """
-    function loadZ2(filename::String, sample::String)
-        open(filename) do s
+    function loadZ2(filepath::String, sample::String)
+        open(filepath) do s
             # split windows newlines if present
             filebody = replace(readstring(s), "\r\n", "\n")
             # extract start time and date from body
@@ -37,7 +38,7 @@ module Coulter
             # unbin data, i.e. the inverse of the hist function
             data = repvec(binlims, binheights)
 
-            CoulterCounterRun(sample, timepoint, data)
+            CoulterCounterRun(basename(filepath), sample, timepoint, data)
         end
     end
 
