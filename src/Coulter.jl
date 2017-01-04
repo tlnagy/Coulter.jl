@@ -13,6 +13,8 @@ module Coulter
         filename::String
         sample::String
         timepoint::DateTime
+        binheights::Vector{Int}
+        binlims::Vector{Float64}
         data::Vector{Float64}
     end
 
@@ -38,7 +40,7 @@ module Coulter
             # unbin data, i.e. the inverse of the hist function
             data = repvec(binlims, binheights)
 
-            CoulterCounterRun(basename(filepath), sample, timepoint, data)
+            CoulterCounterRun(basename(filepath), sample, timepoint, binheights, binlims, data)
         end
     end
 
