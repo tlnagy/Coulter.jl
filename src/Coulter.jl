@@ -1,6 +1,6 @@
 module Coulter
 
-    import Base.-
+    import Base.-, Base.deepcopy
 
     export CoulterCounterRun, loadZ2, -
 
@@ -17,6 +17,9 @@ module Coulter
         binlims::Vector{Float64}
         data::Vector{Float64}
     end
+
+    # copy constructor
+    deepcopy(a::CoulterCounterRun) = CoulterCounterRun([deepcopy(getfield(a, field)) for field in fieldnames(CoulterCounterRun)]...)
 
     """
     loadZ2(filename::String, sample::String)
