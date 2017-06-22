@@ -16,5 +16,5 @@ To use the package do the following
 
 ```julia
 using Coulter
-loadZ2("path to file here.#=Z2")
+loadZ2("path to file here.#=Z2", "sample name")
 ```
