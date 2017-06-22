@@ -6,7 +6,7 @@ times in the second vector. Essentially the inverse operation of `hist`
 """
 function repvec{T}(orig::Vector{T}, reps::Vector{Int})
     (length(orig) != length(reps)) && error("Provided vectors have to be of same length")
-    data = Array(T, sum(reps))
+    data = Array{T}(sum(reps))
     j = 1
     for i in 1:length(orig)
         if reps[i] > 0
