@@ -16,3 +16,10 @@ function repvec{T}(orig::Vector{T}, reps::Vector{Int})
     end
     data
 end
+
+"""
+    volume(diameter)
+
+Given the `diameter` of a sphere, return its volume
+"""
+volume(diameter::Number) = 4/3*pi*(diameter/2)^3

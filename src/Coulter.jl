@@ -1,8 +1,10 @@
 module Coulter
 
+    using KernelDensity
+    using Distributions
     import Base.-, Base.deepcopy
 
-    export CoulterCounterRun, loadZ2, -
+    export CoulterCounterRun, loadZ2, volume, extract_peak, extract_peak_interval, -
 
     include("utils.jl")
 
@@ -17,6 +19,8 @@ module Coulter
         binlims::Vector{Float64}
         data::Vector{Float64}
     end
+
+    include("analysis.jl")
 
     # copy constructor
     deepcopy(a::CoulterCounterRun) = CoulterCounterRun([deepcopy(getfield(a, field)) for field in fieldnames(CoulterCounterRun)]...)
