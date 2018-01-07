@@ -18,6 +18,7 @@ module Coulter
         binheights::Vector{Int}
         binlims::Vector{Float64}
         data::Vector{Float64}
+        params::Dict{String, Any}
     end
 
     include("analysis.jl")
@@ -38,6 +39,10 @@ module Coulter
             # extract start time and date from body
             datetime = match(r"^StartTime= \d*\s*(?<time>\d*:\d*:\d*)\s*(?<date>\d*\s\w{3}\s\d{4})$"m, filebody)
             timepoint = DateTime("$(datetime[:date]) $(datetime[:time])", "dd uuu yyy HH:MM:SS")
+            params = Dict{String, Any}()
+            params["Current"] = parse(Float64, match(r"^Cur=([+-]?[0-9]*[.]?[0-9]+)$"m, filebody)[1])
+            params["Pre-Amp Gain"] = parse(Float64, match(r"^PAGn=([+-]?[0-9]*[.]?[0-9]+)$"m, filebody)[1])
+            params["Volume metered"] = parse(Float64, match(r"^Vol=([+-]?[0-9]*[.]?[0-9]+)$"m, filebody)[1])
 
             # extract data
             matcheddata = match(r"^\[#Bindiam\]\n(?<binlims>.*?)\n^\[Binunits\].*?\[#Binheight\]\n(?<binheight>.*?)\n^\[end\]"sm, filebody)
@@ -47,7 +52,7 @@ module Coulter
             # unbin data, i.e. the inverse of the hist function
             data = repvec(binlims, binheights)
 
-            CoulterCounterRun(basename(filepath), sample, timepoint, binheights, binlims, data)
+            CoulterCounterRun(basename(filepath), sample, timepoint, binheights, binlims, data, params)
         end
     end
 
