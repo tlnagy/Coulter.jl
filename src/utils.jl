@@ -1,5 +1,5 @@
 """
-repvec{T}(orig::Vector{T}, reps::Vector{Int})
+    repvec(orig, reps)
 
 Repeats the items in the first vector by the corresponding number of
 times in the second vector. Essentially the inverse operation of `hist`
