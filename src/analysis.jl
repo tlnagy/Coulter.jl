@@ -15,9 +15,11 @@ function extract_peak_interval(run::CoulterCounterRun; α=0.05, n=250)
         sample!(run.data, alloc)
         results[i] = extract_peak(alloc)
     end
-    sort!(results)
+    sort!(results[.!isnan.(results)])
+    # update n since we might have deleted some values due to NaNs
+    n = length(results)
 
-    orig_est, results[ceil(Int, (1-α/2)*n)], results[floor(Int, (α/2)*n+1)]
+    orig_est, max(orig_est, results[ceil(Int, (1-α/2)*n)]), min(orig_est, results[floor(Int, (α/2)*n+1)])
 end
 
 function extract_peak(data::Array)
@@ -26,3 +28,63 @@ function extract_peak(data::Array)
 end
 
 extract_peak(run::CoulterCounterRun) = extract_peak(run.data)
+
+
+"""
+    _find_peaks(xs, ys; minx, miny)
+
+Finds prominent peaks in `ys` and returns the values from `xs` corresponding to
+the location of these peaks. `minx` and `miny` can be used to exclude peaks that
+are too small in `x` or `y`.
+"""
+function _find_peaks{T}(xs::Array{T}, ys::Array{T}; minx=330, miny=0.0005)
+    loc = zero(T) # location of an extremum
+    width = zero(T) # width of an extremum
+    sign = -1
+    extrema = T[]
+    heights = T[miny]
+    for i in 2:length(ys)
+        if ys[i] > ys[i-1]
+            if sign < 0 && width > 0
+                if ys[i-1] > miny
+                    push!(extrema, loc/width)
+                    push!(heights, ys[i-1])
+                end
+                loc = 0
+                width = 0
+            end
+            loc = xs[i]
+            width = 1
+            sign = 1
+        elseif ys[i] == ys[i-1]
+            loc += xs[i]
+            width += 1
+        elseif ys[i] < ys[i-1]
+            if sign > 0 && width > 0
+                if ys[i-1] > miny
+                    push!(extrema, loc/width)
+                    push!(heights, ys[i-1])
+                end
+                loc = 0
+                width = 0
+            end
+            loc = xs[i]
+            width = 1
+            sign = -1
+        end
+    end
+
+    push!(heights, miny)
+
+    peaks = T[]
+    # peaks are every second value in heights
+    for i in 2:2:length(heights)-1
+        # peak shows significant prominence versus their adjacent vallies
+        if abs(log2(heights[i]./heights[i-1])+log2(heights[i]./heights[i+1])) .> 0.5
+            if extrema[i-1] > minx
+                push!(peaks, extrema[i-1])
+            end
+        end
+    end
+    peaks
+end
