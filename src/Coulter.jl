@@ -1,5 +1,7 @@
 module Coulter
 
+    __precompile__()
+
     using KernelDensity
     using Distributions
     import Base.-, Base.deepcopy
