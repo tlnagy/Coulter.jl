@@ -10,9 +10,10 @@ generated on the empirically by bootstrapping the data `n` times.
 function extract_peak_interval(run::CoulterCounterRun; α=0.05, n=250)
     alloc = zeros(length(run.data))
     results = zeros(n)
-    orig_est = extract_peak(run.data)
+    data = volume.(run.data)
+    orig_est = extract_peak(data)
     for i in 1:n
-        sample!(run.data, alloc)
+        sample!(data, alloc)
         results[i] = extract_peak(alloc)
     end
     sort!(results[.!isnan.(results)])
@@ -24,10 +25,10 @@ end
 
 function extract_peak(data::Array)
     kd_est = kde(data)
-    return volume(kd_est.x[findmax(kd_est.density)[2]])
+    _find_peaks(collect(kd_est.x), kd_est.density)[1]
 end
 
-extract_peak(run::CoulterCounterRun) = extract_peak(run.data)
+extract_peak(run::CoulterCounterRun) = extract_peak(volume.(run.data))
 
 
 """
