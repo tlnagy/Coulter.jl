@@ -19,8 +19,13 @@ end
 
 @testset "Analysis" begin
     @testset "Peak-finding" begin
-        # simplified example
+        # flat line, no peaks
         ys = fill(0.1, 20)
+        xs = collect(1.0:20)
+
+        @test length(Coulter._find_peaks(xs, ys, minx=0.0)) == 0
+
+        # add two peaks at 10.5 and 16
         ys[1] = 0.0
         ys[10] = 0.2
         ys[11] = 0.2
@@ -28,7 +33,6 @@ end
         ys[17] = 0.3
         ys[18] = 0.1
         ys[20] = 0.0
-        xs = collect(1.0:20)
 
         @test all(Coulter._find_peaks(xs, ys, minx=0.0) .== [10.5, 16.0])
 
