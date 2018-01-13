@@ -2,12 +2,19 @@ using Coulter
 using Base.Test
 using Distributions
 using KernelDensity
+using StatsBase
 
 @testset "Loading" begin
     data = loadZ2("testdata/b_0_1.=#Z2", "blank")
 
     @test data.timepoint == DateTime(2017, 12, 22, 17, 46, 58)
     @test all(data.binheights .== 0.0)
+
+    run = loadZ2("testdata/lat0um_0_1.=#Z2")
+
+    @test mode(run.data) == run.binlims[findmax(run.binheights)[2]]
+    @test minimum(run.data) == run.binlims[findfirst(run.binheights)]
+    @test maximum(run.data) == run.binlims[findlast(run.binheights)]
 end
 
 @testset "Analysis" begin

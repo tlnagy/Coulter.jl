@@ -58,6 +58,8 @@ module Coulter
         end
     end
 
+    loadZ2(filepath::String) = loadZ2(filepath, "N/A")
+
     -(a::CoulterCounterRun, b::CoulterCounterRun) = a.timepoint - b.timepoint
     -(a::CoulterCounterRun, b::DateTime) = a.timepoint - b
 end
