@@ -49,7 +49,7 @@ end
         peaks = Coulter._find_peaks(collect(kd_est.x), kd_est.density, minx=0.0)
         @test all((peaks .- [289.325, 446.655]) .< 0.01)
 
-        @test Coulter.extract_peak(volume.(sim_data)) ≈ 446.654739
+        @test Coulter.extract_peak(sim_data) ≈ 446.654739
     end
 end
 

@@ -24,11 +24,11 @@ function extract_peak_interval(run::CoulterCounterRun; α=0.05, n=250)
 end
 
 function extract_peak(data::Array)
-    kd_est = kde(data)
+    kd_est = kde(volume.(data))
     _find_peaks(collect(kd_est.x), kd_est.density)[1]
 end
 
-extract_peak(run::CoulterCounterRun) = extract_peak(volume.(run.data))
+extract_peak(run::CoulterCounterRun) = extract_peak(run.data)
 
 
 """
@@ -38,7 +38,7 @@ Finds prominent peaks in `ys` and returns the values from `xs` corresponding to
 the location of these peaks. `minx` and `miny` can be used to exclude peaks that
 are too small in `x` or `y`.
 """
-function _find_peaks{T}(xs::Array{T}, ys::Array{T}; minx=330, miny=0.0005)
+function _find_peaks{T}(xs::Array{T}, ys::Array{T}; minx=310, miny=0.0005)
     loc = zero(T) # location of an extremum
     width = zero(T) # width of an extremum
     sign = -1
