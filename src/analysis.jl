@@ -25,7 +25,7 @@ end
 
 function extract_peak(data::Array)
     kd_est = kde(volume.(data))
-    _find_peaks(collect(kd_est.x), kd_est.density)[1]
+    _find_peaks(collect(kd_est.x), kd_est.density)[end]
 end
 
 extract_peak(run::CoulterCounterRun) = extract_peak(run.data)
@@ -93,6 +93,9 @@ function _find_peaks{T}(xs::Array{T}, ys::Array{T}; minx=310, miny=0.0005)
                 push!(peaks, extrema[i-1])
             end
         end
+    end
+    if length(peaks) > 1
+        warn("Multiple viable peaks identified: $(join(peaks, ", "))")
     end
     peaks
 end
