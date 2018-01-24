@@ -10,10 +10,9 @@ generated on the empirically by bootstrapping the data `n` times.
 function extract_peak_interval(run::CoulterCounterRun; α=0.05, n=250)
     alloc = zeros(length(run.data))
     results = zeros(n)
-    data = volume.(run.data)
-    orig_est = extract_peak(data)
+    orig_est = extract_peak(run.data)
     for i in 1:n
-        sample!(data, alloc)
+        sample!(run.data, alloc)
         results[i] = extract_peak(alloc)
     end
     sort!(results[.!isnan.(results)])
