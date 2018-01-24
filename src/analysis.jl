@@ -44,13 +44,13 @@ function _find_peaks{T}(xs::Array{T}, ys::Array{T}; minx=310, miny=0.0005)
     sign = -1
     extrema = T[]
     heights = T[miny]
+    is_peak = Bool[]
     for i in 2:length(ys)
         if ys[i] > ys[i-1]
             if sign < 0 && width > 0
-                if ys[i-1] > miny
-                    push!(extrema, loc/width)
-                    push!(heights, ys[i-1])
-                end
+                push!(extrema, loc/width)
+                push!(heights, ys[i-1])
+                push!(is_peak, false)
                 loc = 0
                 width = 0
             end
@@ -62,16 +62,23 @@ function _find_peaks{T}(xs::Array{T}, ys::Array{T}; minx=310, miny=0.0005)
             width += 1
         elseif ys[i] < ys[i-1]
             if sign > 0 && width > 0
-                if ys[i-1] > miny
-                    push!(extrema, loc/width)
-                    push!(heights, ys[i-1])
-                end
+                push!(extrema, loc/width)
+                push!(heights, ys[i-1])
+                push!(is_peak, true)
                 loc = 0
                 width = 0
             end
             loc = xs[i]
             width = 1
             sign = -1
+        end
+    end
+
+    for i in 2:length(is_peak)
+        # This should only be triggered if a peak is not followed by a valley, or vice versa
+        if !xor(is_peak[i], is_peak[i-1])
+            warn("Unable to establish prominence. Peak identification potentially flawed.")
+            break
         end
     end
 
@@ -82,7 +89,7 @@ function _find_peaks{T}(xs::Array{T}, ys::Array{T}; minx=310, miny=0.0005)
     for i in 2:2:length(heights)-1
         # peak shows significant prominence versus their adjacent vallies
         if abs(log2(heights[i]./heights[i-1])+log2(heights[i]./heights[i+1])) .> 0.5
-            if extrema[i-1] > minx
+            if extrema[i-1] > minx && heights[i] > miny
                 push!(peaks, extrema[i-1])
             end
         end
