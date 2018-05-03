@@ -3,3 +3,5 @@ FileIO
 KernelDensity
 Distributions
 Compat 0.41.0
+Gadfly
+StatsBase

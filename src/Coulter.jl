@@ -5,10 +5,13 @@ module Coulter
     using KernelDensity
     using Distributions
     using Compat
+    using Gadfly
+    using StatsBase
     import Base.-, Base.deepcopy
     import Base.Dates.Second
 
-    export CoulterCounterRun, loadZ2, volume, extract_peak, extract_peak_interval, -
+    export CoulterCounterRun, loadZ2, volume, extract_peak, extract_peak_interval, -,
+        extract_peak!
 
     include("utils.jl")
 

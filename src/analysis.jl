@@ -22,12 +22,7 @@ function extract_peak_interval(run::CoulterCounterRun; α=0.05, n=250)
     orig_est, max(orig_est, results[ceil(Int, (1-α/2)*n)]), min(orig_est, results[floor(Int, (α/2)*n+1)])
 end
 
-function extract_peak(data::Array)
-    kd_est = kde(volume.(data))
-    _find_peaks(collect(kd_est.x), kd_est.density)[end]
-end
 
-extract_peak(run::CoulterCounterRun) = extract_peak(run.data)
 
 
 """
@@ -97,4 +92,64 @@ function _find_peaks{T}(xs::Array{T}, ys::Array{T}; minx=310, miny=0.0005)
         warn("Multiple viable peaks identified: $(join(peaks, ", "))")
     end
     peaks
+end
+
+function extract_peak(data::Array)
+    kd_est = kde(volume.(data))
+    _find_peaks(collect(kd_est.x), kd_est.density)[end]
+end
+
+extract_peak(run::CoulterCounterRun) = extract_peak(run.data)
+
+theme = Theme(background_color=colorant"white", panel_stroke=colorant"black",
+    grid_color=colorant"Gray", line_width=.7mm,
+    major_label_font_size=14pt, minor_label_font_size=11pt,
+    minor_label_color=colorant"black", major_label_color=colorant"black",
+key_title_color=colorant"black", key_label_color=colorant"black", key_title_font_size=13pt,
+    lowlight_opacity=0.3,
+key_label_font_size=10pt);
+
+function extract_peak!(run::CoulterCounterRun; folder="raw_coulter_graphs")
+    mkpath(folder)
+    kd_est = kde(volume.(run.data))
+    peaks = _find_peaks(collect(kd_est.x), kd_est.density)
+    # dumb solution for now
+    run.livepeak = peaks[end]
+    run.allpeaks = peaks
+
+    xmins = volume.(run.binlims[1:end-1])
+    xmaxs = volume.(run.binlims[2:end])
+    ys = run.binheights[2:end]
+
+    raw = layer(xmin=xmins,
+                xmax=xmaxs,
+                y=ys./sum((xmaxs .- xmins) .* ys),
+                Geom.bar, theme)
+    est = layer(x=kd_est.x,
+                y=kd_est.density,
+                Geom.line,
+                Theme(default_color=colorant"orange", theme))
+    plot_peaks = [layer(xintercept=[run.livepeak],
+                        Geom.vline,
+                        Theme(default_color=colorant"red", theme))
+                 ]
+    if length(run.allpeaks) > 0
+        push!(plot_peaks, layer(xintercept=filter(x-> x ≠ run.livepeak, run.allpeaks),
+                                Geom.vline,
+                                Theme(default_color=colorant"gray", theme)))
+    end
+    # Round up to the nearest hundred fL that includes the lower 98th percentile of data
+    xlimmax = ceil(percentile(Coulter.volume.(run.data), 98), -2)
+    time = run.reltime != nothing ? run.reltime : run.timepoint
+    p = plot(plot_peaks..., est, raw, theme,
+             Coord.cartesian(xmin=50, xmax=xlimmax),
+             Guide.xticks(ticks=collect(0:100:xlimmax)),
+             Guide.xlabel("Volume (fL)"), theme,
+             Guide.title("$(time.value)s [$(run.sample)]"),
+             Guide.manual_color_key("Legend", ["Raw Coulter data", "KDE fit", "Called live peak", "Other peaks"], ["deepskyblue", "orange", "red", "gray"])
+    )
+
+    filename = split(run.filename, ".=#Z2")[1]
+    filepath = joinpath("raw_coulter_graphs", "$filename.svg")
+    draw(SVG(filepath, 17cm, 10cm), p)
 end
