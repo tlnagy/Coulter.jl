@@ -10,8 +10,9 @@ module Coulter
     import Base.-, Base.deepcopy
     import Base.Dates.Second
 
-    export CoulterCounterRun, loadZ2, volume, extract_peak, extract_peak_interval, -,
-        extract_peak!
+    export CoulterCounterRun, loadZ2, -, volume, diameter,
+        extract_peak, extract_peak!, extract_peak_interval
+
 
     include("utils.jl")
 
@@ -49,6 +50,7 @@ module Coulter
             # extract start time and date from body
             datetime = match(r"^StartTime= \d*\s*(?<time>\d*:\d*:\d*)\s*(?<date>\d*\s\w{3}\s\d{4})$"m, filebody)
             timepoint = DateTime("$(datetime[:date]) $(datetime[:time])", "dd uuu yyy HH:MM:SS")
+
             params = Dict{String, Any}()
             params["Current"] = parse(Float64, match(r"^Cur=([+-]?[0-9]*[.]?[0-9]+)$"m, filebody)[1])
             params["Pre-Amp Gain"] = parse(Float64, match(r"^PAGn=([+-]?[0-9]*[.]?[0-9]+)$"m, filebody)[1])
@@ -57,7 +59,7 @@ module Coulter
             # extract data
             matcheddata = match(r"^\[#Bindiam\]\n(?<binlims>.*?)\n^\[Binunits\].*?\[#Binheight\]\n(?<binheight>.*?)\n^\[end\]"sm, filebody)
             binheights = [parse(Int64, x) for x in split(matcheddata[:binheight], "\n ")]
-            binlims = [parse(Float64, x) for x in split(matcheddata[:binlims], "\n ")]
+            binlims = [volume(parse(Float64, x)) for x in split(matcheddata[:binlims], "\n ")]
 
             # unbin data, i.e. the inverse of the hist function
             data = repvec(binlims, binheights)

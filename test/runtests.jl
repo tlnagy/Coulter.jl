@@ -42,10 +42,10 @@ end
         ys = pdf.(dist, xs)
 
         srand(1234)
-        sim_data = rand(dist, 10000)
+        sim_data = volume.(rand(dist, 10000))
         srand()
 
-        kd_est = kde(volume.(sim_data))
+        kd_est = kde(sim_data)
         peaks = Coulter._find_peaks(collect(kd_est.x), kd_est.density, minx=0.0)
         @test all((peaks .- [289.325, 446.655]) .< 0.01)
 
@@ -56,4 +56,6 @@ end
 @testset "Misc" begin
     @test volume(0.0) == 0.0
     @test volume(10.0) ≈ 523.59878
+    @test diameter(0.0) == 0.0
+    @test diameter(523.59878) ≈ 10.0
 end

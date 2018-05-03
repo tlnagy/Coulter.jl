@@ -95,7 +95,7 @@ function _find_peaks{T}(xs::Array{T}, ys::Array{T}; minx=310, miny=0.0005)
 end
 
 function extract_peak(data::Array)
-    kd_est = kde(volume.(data))
+    kd_est = kde(data)
     _find_peaks(collect(kd_est.x), kd_est.density)[end]
 end
 
@@ -111,14 +111,14 @@ key_label_font_size=10pt);
 
 function extract_peak!(run::CoulterCounterRun; folder="raw_coulter_graphs")
     mkpath(folder)
-    kd_est = kde(volume.(run.data))
+    kd_est = kde(run.data)
     peaks = _find_peaks(collect(kd_est.x), kd_est.density)
     # dumb solution for now
     run.livepeak = peaks[end]
     run.allpeaks = peaks
 
-    xmins = volume.(run.binlims[1:end-1])
-    xmaxs = volume.(run.binlims[2:end])
+    xmins = run.binlims[1:end-1]
+    xmaxs = run.binlims[2:end]
     ys = run.binheights[2:end]
 
     raw = layer(xmin=xmins,
@@ -139,7 +139,7 @@ function extract_peak!(run::CoulterCounterRun; folder="raw_coulter_graphs")
                                 Theme(default_color=colorant"gray", theme)))
     end
     # Round up to the nearest hundred fL that includes the lower 98th percentile of data
-    xlimmax = ceil(percentile(Coulter.volume.(run.data), 98), -2)
+    xlimmax = ceil(percentile(run.data, 98), -2)
     time = run.reltime != nothing ? run.reltime : run.timepoint
     p = plot(plot_peaks..., est, raw, theme,
              Coord.cartesian(xmin=50, xmax=xlimmax),

@@ -22,4 +22,11 @@ end
 
 Given the `diameter` of a sphere, return its volume
 """
-volume(diameter::Number) = 4/3*pi*(diameter/2)^3
+volume(diameter::Number) = 4/3*π*(diameter/2)^3
+
+"""
+    diameter(volume)
+
+Given the `volume` of a sphere, compute its diameter
+"""
+diameter(volume::Number) = 2*(3/4*volume/π)^(1/3)
