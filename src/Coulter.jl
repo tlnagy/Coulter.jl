@@ -4,7 +4,9 @@ module Coulter
 
     using KernelDensity
     using Distributions
+    using Compat
     import Base.-, Base.deepcopy
+    import Base.Dates.Second
 
     export CoulterCounterRun, loadZ2, volume, extract_peak, extract_peak_interval, -
 
@@ -17,9 +19,12 @@ module Coulter
         filename::String
         sample::String
         timepoint::DateTime
+        reltime::Union{Second, Nothing}
         binheights::Vector{Int}
         binlims::Vector{Float64}
         data::Vector{Float64}
+        livepeak::Union{Float64, Nothing}
+        allpeaks::Vector{Float64}
         params::Dict{String, Any}
     end
 
@@ -54,7 +59,8 @@ module Coulter
             # unbin data, i.e. the inverse of the hist function
             data = repvec(binlims, binheights)
 
-            CoulterCounterRun(basename(filepath), sample, timepoint, binheights, binlims, data, params)
+            CoulterCounterRun(basename(filepath), sample, timepoint, nothing,
+                              binheights, binlims, data, nothing, Float64[], params)
         end
     end
 
