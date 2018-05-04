@@ -24,8 +24,11 @@ module Coulter
         sample::String
         timepoint::DateTime
         reltime::Union{Second, Nothing}
-        binheights::Vector{Int}
         binlims::Vector{Float64}
+        binvols::Vector{Float64}
+        binheights::Vector{Number}
+        """Whether the `binheights` is the raw count or total volume"""
+        yvariable::Symbol
         data::Vector{Float64}
         livepeak::Union{Float64, Nothing}
         allpeaks::Vector{Float64}
@@ -43,7 +46,7 @@ module Coulter
     Loads `filename` and assigns it a sample, returns a
     `CoulterCounterRun` object
     """
-    function loadZ2(filepath::String, sample::String)
+    function loadZ2(filepath::String, sample::String; yvariable=:count)
         open(filepath) do s
             # split windows newlines if present
             filebody = replace(readstring(s), "\r\n", "\n")
@@ -57,15 +60,24 @@ module Coulter
             params["Volume metered"] = parse(Float64, match(r"^Vol=([+-]?[0-9]*[.]?[0-9]+)$"m, filebody)[1])
 
             # extract data
-            matcheddata = match(r"^\[#Bindiam\]\n(?<binlims>.*?)\n^\[Binunits\].*?\[#Binheight\]\n(?<binheight>.*?)\n^\[end\]"sm, filebody)
-            binheights = [parse(Int64, x) for x in split(matcheddata[:binheight], "\n ")]
-            binlims = [volume(parse(Float64, x)) for x in split(matcheddata[:binlims], "\n ")]
+            matcheddata = match(r"^\[#Bindiam\]\n(?<binvols>.*?)\n^\[Binunits\].*?\[#Binheight\]\n(?<binheight>.*?)\n^\[end\]"sm, filebody)
+            binlims = [volume(parse(Float64, x)) for x in split(matcheddata[:binvols], "\n ")]
+            # the Coulter software takes the mean the upper and lower limits to
+            # compute the volume of everything that falls in the bin
+            binvols = [(binlims[i] + binlims[i+1])/2 for i in 1:length(binlims)-1]
+            binheights = Int[parse(Int, x) for x in split(matcheddata[:binheight], "\n ")]
+            pop!(binheights) # remove the last extraneous value
 
             # unbin data, i.e. the inverse of the hist function
-            data = repvec(binlims, binheights)
+            data = repvec(binvols, binheights)
+
+            if yvariable == :volume
+                binheights = binvols .* binheights
+            end
 
             CoulterCounterRun(basename(filepath), sample, timepoint, nothing,
-                              binheights, binlims, data, nothing, Float64[], params)
+                              binlims, binvols, binheights, yvariable, data,
+                              nothing, Float64[], params)
         end
     end
 

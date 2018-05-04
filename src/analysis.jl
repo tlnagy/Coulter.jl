@@ -119,11 +119,10 @@ function extract_peak!(run::CoulterCounterRun; folder="raw_coulter_graphs")
 
     xmins = run.binlims[1:end-1]
     xmaxs = run.binlims[2:end]
-    ys = run.binheights[2:end]
 
     raw = layer(xmin=xmins,
                 xmax=xmaxs,
-                y=ys./sum((xmaxs .- xmins) .* ys),
+                y=run.binheights./sum((xmaxs .- xmins) .* run.binheights),
                 Geom.bar, theme)
     est = layer(x=kd_est.x,
                 y=kd_est.density,
@@ -145,7 +144,7 @@ function extract_peak!(run::CoulterCounterRun; folder="raw_coulter_graphs")
              Coord.cartesian(xmin=50, xmax=xlimmax),
              Guide.xticks(ticks=collect(0:100:xlimmax)),
              Guide.xlabel("Volume (fL)"), theme,
-             Guide.title("$(time.value)s [$(run.sample)]"),
+             Guide.title("$time [$(run.sample)]"),
              Guide.manual_color_key("Legend", ["Raw Coulter data", "KDE fit", "Called live peak", "Other peaks"], ["deepskyblue", "orange", "red", "gray"])
     )
 

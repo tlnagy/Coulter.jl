@@ -12,9 +12,24 @@ using StatsBase
 
     run = loadZ2("testdata/lat0um_0_1.=#Z2")
 
-    @test mode(run.data) == run.binlims[findmax(run.binheights)[2]]
-    @test minimum(run.data) == run.binlims[findfirst(run.binheights)]
-    @test maximum(run.data) == run.binlims[findlast(run.binheights)]
+    @test mode(run.data) == run.binvols[findmax(run.binheights)[2]]
+    @test minimum(run.data) == run.binvols[findfirst(run.binheights)]
+    @test maximum(run.data) == run.binvols[findlast(run.binheights)]
+
+    run2 = loadZ2("testdata/wt_0min_0_1.=#Z2", "wt")
+
+    # correct values from Coulter software
+
+    # make sure the common volume is in position 76
+    @test findmax(run2.binheights)[2] == 76
+    @test all(run2.binheights[75:77] .== [281, 326, 289])
+
+    # load in total volume mode where the y axis is now counts*volume
+    # this prevents overweighting of small volume objects
+    run3 = loadZ2("testdata/wt_0min_0_1.=#Z2", "wt"; yvariable=:volume)
+
+    # the coulter rounds to 4 digits
+    @test all(map(x->round(x, -2), run3.binheights[75:77]) .== [113.7e3, 133.6e3, 120.0e3])
 end
 
 @testset "Analysis" begin
