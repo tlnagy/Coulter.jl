@@ -30,6 +30,12 @@ using StatsBase
 
     # the coulter rounds to 4 digits
     @test all(map(x->round(x, -2), run3.binheights[75:77]) .== [113.7e3, 133.6e3, 120.0e3])
+
+    # test loading whole folders
+    runs = Coulter.load_folder("testdata/")
+
+    @test "wt" in keys(runs)
+    @test sum(runs["wt"][1].data) == sum(run3.data)
 end
 
 @testset "Analysis" begin

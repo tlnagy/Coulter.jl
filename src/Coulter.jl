@@ -7,6 +7,7 @@ module Coulter
     using Compat
     using Gadfly
     using StatsBase
+    using DataStructures
     import Base.-, Base.deepcopy
     import Base.Dates.Second
 

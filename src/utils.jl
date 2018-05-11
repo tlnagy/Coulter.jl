@@ -30,3 +30,27 @@ volume(diameter::Number) = 4/3*π*(diameter/2)^3
 Given the `volume` of a sphere, compute its diameter
 """
 diameter(volume::Number) = 2*(3/4*volume/π)^(1/3)
+
+"""
+    load_folder(folder)
+
+Loads all coulter runs in a folder into a dictionary where the keys are the
+first parts of the filenames separated by an underscore.
+"""
+function load_folder(folder)
+    runs = DefaultDict{String, Array{Coulter.CoulterCounterRun}}([])
+
+    files = readdir(folder)
+    filter!(x -> splitext(x)[2] == ".=#Z2", files)
+
+    for measurement in files
+        catname = split(measurement, "_")[1]
+        push!(runs[catname], loadZ2(joinpath(folder, measurement), String(catname)))
+    end
+
+    for (catname, samples) in runs
+        sort!(samples, by=i->i.timepoint)
+    end
+
+    runs
+end
