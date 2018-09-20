@@ -1,8 +1,10 @@
 using Coulter
-using Base.Test
+using Test
+using Dates
 using Distributions
 using KernelDensity
 using StatsBase
+using Random
 
 @testset "Loading" begin
     data = loadZ2("testdata/b_0_1.=#Z2", "blank")
@@ -13,8 +15,8 @@ using StatsBase
     run = loadZ2("testdata/lat0um_0_1.=#Z2")
 
     @test mode(run.data) == run.binvols[findmax(run.binheights)[2]]
-    @test minimum(run.data) == run.binvols[findfirst(run.binheights)]
-    @test maximum(run.data) == run.binvols[findlast(run.binheights)]
+    @test minimum(run.data) == run.binvols[findfirst(!iszero, run.binheights)]
+    @test maximum(run.data) == run.binvols[findlast(!iszero, run.binheights)]
 
     run2 = loadZ2("testdata/wt_0min_0_1.=#Z2", "wt")
 
@@ -29,7 +31,7 @@ using StatsBase
     run3 = loadZ2("testdata/wt_0min_0_1.=#Z2", "wt"; yvariable=:volume)
 
     # the coulter rounds to 4 digits
-    @test all(map(x->round(x, -2), run3.binheights[75:77]) .== [113.7e3, 133.6e3, 120.0e3])
+    @test all(map(x->round(x, digits=-2), run3.binheights[75:77]) .== [113.7e3, 133.6e3, 120.0e3])
 
     # test loading whole folders
     runs = Coulter.load_folder("testdata/")
@@ -59,12 +61,12 @@ end
 
         # more realistic example
         dist = MixtureModel([Normal(8.2, 0.75), Normal(9.6, 0.5)], [0.6, 0.4])
-        xs = linspace(7, 17, 400)
+        xs = range(7, stop=17, length=400)
         ys = pdf.(dist, xs)
 
-        srand(1234)
+        Random.seed!(1234)
         sim_data = volume.(rand(dist, 10000))
-        srand()
+        Random.seed!()
 
         kd_est = kde(sim_data)
         peaks = Coulter._find_peaks(collect(kd_est.x), kd_est.density, minx=0.0)
