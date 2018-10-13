@@ -137,7 +137,7 @@ function extract_peak!(run::CoulterCounterRun; folder="raw_coulter_graphs")
                                 Theme(default_color=colorant"gray", theme)))
     end
     # Round up to the nearest hundred fL that includes the lower 98th percentile of data
-    xlimmax = ceil(percentile(run.data, 98), -2)
+    xlimmax = ceil(percentile(run.data, 98), digits=-2)
     time = run.reltime != nothing ? run.reltime : run.timepoint
     p = plot(plot_peaks..., est, raw, theme,
              Coord.cartesian(xmin=50, xmax=xlimmax),

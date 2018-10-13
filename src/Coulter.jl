@@ -19,7 +19,7 @@ module Coulter
     """
     A simplified representation of a coulter counter run
     """
-    struct CoulterCounterRun
+    mutable struct CoulterCounterRun
         filename::String
         sample::String
         timepoint::DateTime
