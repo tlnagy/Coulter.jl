@@ -4,12 +4,11 @@ module Coulter
 
     using KernelDensity
     using Distributions
-    using Compat
     using Gadfly
     using StatsBase
     using DataStructures
     import Base.-, Base.deepcopy
-    import Base.Dates.Second
+    using Dates: Second, DateTime
 
     export CoulterCounterRun, loadZ2, -, volume, diameter,
         extract_peak, extract_peak!, extract_peak_interval
@@ -20,7 +19,7 @@ module Coulter
     """
     A simplified representation of a coulter counter run
     """
-    type CoulterCounterRun
+    mutable struct CoulterCounterRun
         filename::String
         sample::String
         timepoint::DateTime
@@ -50,7 +49,7 @@ module Coulter
     function loadZ2(filepath::String, sample::String; yvariable=:count)
         open(filepath) do s
             # split windows newlines if present
-            filebody = replace(readstring(s), "\r\n", "\n")
+            filebody = replace(read(s, String), "\r\n"=>"\n")
             # extract start time and date from body
             datetime = match(r"^StartTime= \d*\s*(?<time>\d*:\d*:\d*)\s*(?<date>\d*\s\w{3}\s\d{4})$"m, filebody)
             timepoint = DateTime("$(datetime[:date]) $(datetime[:time])", "dd uuu yyy HH:MM:SS")

@@ -32,7 +32,7 @@ Finds prominent peaks in `ys` and returns the values from `xs` corresponding to
 the location of these peaks. `minx` and `miny` can be used to exclude peaks that
 are too small in `x` or `y`.
 """
-function _find_peaks{T}(xs::Array{T}, ys::Array{T}; minx=310, miny=0.0005)
+function _find_peaks(xs::Array{T}, ys::Array{T}; minx=310, miny=0.0005) where T
     loc = zero(T) # location of an extremum
     width = zero(T) # width of an extremum
     sign = -1
@@ -71,7 +71,7 @@ function _find_peaks{T}(xs::Array{T}, ys::Array{T}; minx=310, miny=0.0005)
     for i in 2:length(is_peak)
         # This should only be triggered if a peak is not followed by a valley, or vice versa
         if !xor(is_peak[i], is_peak[i-1])
-            warn("Unable to establish prominence. Peak identification potentially flawed.")
+            @warn("Unable to establish prominence. Peak identification potentially flawed.")
             break
         end
     end
@@ -89,7 +89,7 @@ function _find_peaks{T}(xs::Array{T}, ys::Array{T}; minx=310, miny=0.0005)
         end
     end
     if length(peaks) > 1
-        warn("Multiple viable peaks identified: $(join(peaks, ", "))")
+        @warn("Multiple viable peaks identified: $(join(peaks, ", "))")
     end
     peaks
 end
@@ -106,7 +106,6 @@ theme = Theme(background_color=colorant"white", panel_stroke=colorant"black",
     major_label_font_size=14pt, minor_label_font_size=11pt,
     minor_label_color=colorant"black", major_label_color=colorant"black",
 key_title_color=colorant"black", key_label_color=colorant"black", key_title_font_size=13pt,
-    lowlight_opacity=0.3,
 key_label_font_size=10pt);
 
 function extract_peak!(run::CoulterCounterRun; folder="raw_coulter_graphs")
@@ -138,7 +137,7 @@ function extract_peak!(run::CoulterCounterRun; folder="raw_coulter_graphs")
                                 Theme(default_color=colorant"gray", theme)))
     end
     # Round up to the nearest hundred fL that includes the lower 98th percentile of data
-    xlimmax = ceil(percentile(run.data, 98), -2)
+    xlimmax = ceil(percentile(run.data, 98), digits=-2)
     time = run.reltime != nothing ? run.reltime : run.timepoint
     p = plot(plot_peaks..., est, raw, theme,
              Coord.cartesian(xmin=50, xmax=xlimmax),
