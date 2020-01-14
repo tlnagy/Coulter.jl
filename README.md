@@ -9,7 +9,8 @@ Interfacing with Beckman-Coulter Multisizer/Z2 Coulter Counter files (.#=Z2, etc
 Run the following in the Julia REPL
 
 ```julia
-Pkg.clone("https://github.com/tlnagy/Coulter.jl.git")
+using Pkg
+Pkg.add("Coulter")
 ```
 
 To use the package do the following

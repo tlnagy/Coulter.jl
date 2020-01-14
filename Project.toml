@@ -1,0 +1,21 @@
+name = "Coulter"
+uuid = "a3d351dc-6fd6-5e2a-8264-8c30d37eaa59"
+authors = ["Tamas Nagy <github@tamasnagy.com>"]
+version = "0.2.0"
+
+[deps]
+DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
+Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
+FileIO = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
+Gadfly = "c91e804a-d5a3-530f-b6f0-dfbca275c004"
+KernelDensity = "5ab0869b-81aa-558d-bb23-cbf5423bbe9b"
+StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
+
+[compat]
+julia = "1"
+DataStructures = "0.17"
+Distributions = "0.22"
+FileIO = "1"
+Gadfly = "1"
+KernelDensity = "0.5"
+StatsBase = "0.32"
