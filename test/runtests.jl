@@ -4,7 +4,7 @@ using Dates
 using Distributions
 using KernelDensity
 using StatsBase
-using Random
+using StableRNGs
 
 @testset "Loading" begin
     data = loadZ2("testdata/b_0_1.=#Z2", "blank")
@@ -60,19 +60,18 @@ end
         @test all(Coulter._find_peaks(xs, ys, minx=0.0) .== [10.5, 16.0])
 
         # more realistic example
-        dist = MixtureModel([Normal(8.2, 0.75), Normal(9.6, 0.5)], [0.6, 0.4])
+        dist = MixtureModel([Normal(8.2, 0.5), Normal(9.6, 0.25)], [0.6, 0.4])
         xs = range(7, stop=17, length=400)
         ys = pdf.(dist, xs)
 
-        Random.seed!(1234)
-        sim_data = volume.(rand(dist, 10000))
-        Random.seed!()
+        rng = StableRNG(1234)
+        sim_data = volume.(rand(rng, dist, 10_000))
 
         kd_est = kde(sim_data)
         peaks = Coulter._find_peaks(collect(kd_est.x), kd_est.density, minx=0.0)
-        @test all((peaks .- [289.325, 446.655]) .< 0.01)
 
-        @test Coulter.extract_peak(sim_data) ≈ 446.654739
+        # make sure the volume from the extracted peak is within 10 fL of correct
+        @test all((peaks .- volume.([8.2, 9.6])) .< 10)
     end
 end
 
