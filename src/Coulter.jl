@@ -4,7 +4,6 @@ module Coulter
 
     using KernelDensity
     using Distributions
-    using Gadfly
     using StatsBase
     using DataStructures
     import Base.-, Base.deepcopy
