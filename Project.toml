@@ -1,7 +1,7 @@
 name = "Coulter"
 uuid = "a3d351dc-6fd6-5e2a-8264-8c30d37eaa59"
 authors = ["Tamas Nagy <github@tamasnagy.com>"]
-version = "0.3.0"
+version = "0.4.0"
 
 [deps]
 DataStructures = "864edb3b-99cc-5e75-8d2d-829cb0a9cfe8"
